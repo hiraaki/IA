@@ -1,137 +1,73 @@
 package sample;
-
+import models.*;
+import Controller.*;
 import javafx.application.Application;
-import javafx.scene.Group;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.TilePane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.PickResult;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-// java 8 code
 public class Main extends Application {
 
-    //Class containing grid (see below)
-    private GridDisplay gridDisplay;
 
-    //Class responsible for displaying the grid containing the Rectangles
-    public class GridDisplay {
 
-        private static final double ELEMENT_SIZE = 50;
-        private static final double GAP = ELEMENT_SIZE / 100;
+    int rows = 15;
+    int columns = 20;
+    double width = 1200;
+    double height = 720;
 
-        private TilePane tilePane = new TilePane();
-        private Group display = new Group(tilePane);
-        private int nRows;
-        private int nCols;
+    ImageView imageView = new ImageView( new Image( "https://upload.wikimedia.org/wikipedia/commons/c/c7/Pink_Cat_2.jpg"));
 
-        public GridDisplay(int nRows, int nCols) {
-            tilePane.setStyle("-fx-background-color: rgba(255, 215, 0, 0.1);");
-            tilePane.setHgap(GAP);
-            tilePane.setVgap(GAP);
-            setColumns(nCols);
-            setRows(nRows);
-        }
-
-        public void setColumns(int newColumns) {
-            nCols = newColumns;
-            tilePane.setPrefColumns(nCols);
-            createElements();
-        }
-
-        public void setRows(int newRows) {
-            nRows = newRows;
-            tilePane.setPrefRows(nRows);
-            createElements();
-        }
-
-        public Group getDisplay() {
-            return display;
-        }
-
-        private void createElements() {
-            tilePane.getChildren().clear();
-            for (int i = 0; i < nCols; i++) {
-                for (int j = 0; j < nRows; j++) {
-                    tilePane.getChildren().add(createElement());
-                }
-            }
-        }
-
-        private Rectangle createElement() {
-            Rectangle rectangle = new Rectangle(ELEMENT_SIZE, ELEMENT_SIZE);
-            rectangle.setStroke(Color.ORANGE);
-            rectangle.setFill(Color.STEELBLUE);
-
-            return rectangle;
-        }
-
-    }
 
     @Override
     public void start(Stage primaryStage) {
+        try {
+            StackPane root = new StackPane();
 
-        //Represents the grid with Rectangles
-        gridDisplay = new GridDisplay(2, 4);
+            // create grid
+            Grid grid = new Grid( columns, rows, width, height);
 
-        //Fields to specify number of rows/columns
-        TextField rowField = new TextField("2");
-        TextField columnField = new TextField("4");
+            MouseGestures mg = new MouseGestures();
 
-        //Function to set an action when text field loses focus
-        buildTextFieldActions(rowField, columnField);
+            // fill grid
+            for (int row = 0; row < rows; row++) {
+                for (int column = 0; column < columns; column++) {
 
-        HBox fields = new HBox(10);
-        fields.getChildren().add(rowField);
-        fields.getChildren().add(new Label("x"));
-        fields.getChildren().add(columnField);
+                    Cell cell = new Cell(column, row);
 
-        BorderPane mainPanel = new BorderPane();
-        mainPanel.setCenter(gridDisplay.getDisplay());
-        mainPanel.setTop(fields);
+                    mg.makePaintable(cell);
 
-        Scene scene = new Scene(mainPanel, 1000, 800);
-        primaryStage.setTitle("Test grid display");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+                    grid.add(cell, column, row);
+                }
+            }
+
+            root.getChildren().addAll(imageView, grid);
+
+            // create scene and stage
+            Scene scene = new Scene(root, width, height);
+            scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+            primaryStage.setScene(scene);
+            primaryStage.show();
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
         launch(args);
     }
 
-    private void buildTextFieldActions(final TextField rowField, final TextField columnField) {
-        rowField.focusedProperty().addListener((ov, t, t1) -> {
-            if (!t1) {
-                if (!rowField.getText().equals("")) {
-                    try {
-                        int nbRow = Integer.parseInt(rowField.getText());
-                        gridDisplay.setRows(nbRow);
-                    } catch (NumberFormatException nfe) {
-                        System.out.println("Please enter a valid number.");
-                    }
-                }
-            }
-        });
 
-        columnField.focusedProperty().addListener((ov, t, t1) -> {
-            if (!t1) {
-                if (!columnField.getText().equals("")) {
-                    try {
-                        int nbColumn = Integer.parseInt(columnField.getText());
-                        gridDisplay.setColumns(nbColumn);
-                    } catch (NumberFormatException nfe) {
-                        System.out.println("Please enter a valid number.");
-                    }
-                }
-            }
-        });
-    }
+
 }
