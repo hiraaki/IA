@@ -51,7 +51,7 @@ public class Main extends Application {
 
             root.getChildren().addAll(imageView, grid);
 
-            // create scene and stage
+            // create scene and s
             Scene scene = new Scene(root, width, height);
             scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
             primaryStage.setScene(scene);
